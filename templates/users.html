@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-8">
+  <!-- Header & Session Bar -->
+  <div class="flex flex-col justify-between gap-4 border-b border-[var(--line)] pb-6 sm:flex-row sm:items-center">
+    <div>
+      <p class="text-xs font-bold uppercase tracking-[0.18em] text-[var(--teal)]">Modul FR-01 • Administrasi Pengguna</p>
+      <h1 class="mt-2 text-3xl font-bold text-[var(--ink)]">Manajemen Data Anggota</h1>
+      <p class="mt-1 text-sm text-[var(--muted)]">
+        Kelola akun anggota, petugas, dan pengelola perpustakaan dalam basis data sistem.
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3.5 py-2 text-right">
+        <p class="text-xs text-[var(--muted)]">Login sebagai</p>
+        <p class="text-sm font-semibold text-[var(--ink)]">
+          {{ current_user.name }}
+          <span class="ml-1 rounded bg-teal-50 px-2 py-0.5 text-xs font-bold uppercase text-[var(--teal)]">
+            {{ current_user.role }}
+          </span>
+        </p>
+      </div>
+      <a
+        href="/auth/logout"
+        class="inline-flex min-h-10 items-center rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+      >
+        Logout
+      </a>
+    </div>
+  </div>
+
+  <!-- Notifikasi -->
+  {% if error %}
+  <div role="alert" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+    <span class="font-semibold">Perhatian:</span> {{ error }}
+  </div>
+  {% endif %}
+
+  {% if success %}
+  <div role="status" class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+    <span class="font-semibold">Sukses:</span> {{ success }}
+  </div>
+  {% endif %}
+
+  <!-- Ringkasan Statistik Role -->
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-5">
+      <p class="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Total Pengguna</p>
+      <p class="mt-2 text-3xl font-bold text-[var(--ink)]">{{ total_users }}</p>
+    </div>
+    <div class="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-5">
+      <p class="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Anggota</p>
+      <p class="mt-2 text-3xl font-bold text-[var(--teal)]">{{ role_counts.anggota }}</p>
+    </div>
+    <div class="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-5">
+      <p class="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Petugas</p>
+      <p class="mt-2 text-3xl font-bold text-amber-600">{{ role_counts.petugas }}</p>
+    </div>
+    <div class="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-5">
+      <p class="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Pengelola</p>
+      <p class="mt-2 text-3xl font-bold text-indigo-600">{{ role_counts.pengelola }}</p>
+    </div>
+  </div>
+
+  <!-- Form Tambah User Baru -->
+  <section aria-labelledby="tambah-user-heading" class="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-6">
+    <h2 id="tambah-user-heading" class="text-lg font-bold text-[var(--ink)]">Tambah Pengguna Baru</h2>
+    <p class="mt-1 text-sm text-[var(--muted)]">Daftarkan akun baru secara langsung dengan penetapan role awal.</p>
+
+    <form action="/auth/anggota/tambah" method="post" class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div>
+        <label for="add_name" class="block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Nama Lengkap</label>
+        <input
+          type="text"
+          id="add_name"
+          name="name"
+          required
+          placeholder="Nama lengkap"
+          class="mt-1.5 block w-full rounded-md border border-[var(--line)] bg-white px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--teal)] focus:outline-none"
+        >
+      </div>
+
+      <div>
+        <label for="add_email" class="block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Email</label>
+        <input
+          type="email"
+          id="add_email"
+          name="email"
+          required
+          placeholder="email@domain.ac.id"
+          class="mt-1.5 block w-full rounded-md border border-[var(--line)] bg-white px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--teal)] focus:outline-none"
+        >
+      </div>
+
+      <div>
+        <label for="add_password" class="block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Password</label>
+        <input
+          type="password"
+          id="add_password"
+          name="password"
+          required
+          minlength="6"
+          placeholder="Min. 6 karakter"
+          class="mt-1.5 block w-full rounded-md border border-[var(--line)] bg-white px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--teal)] focus:outline-none"
+        >
+      </div>
+
+      <div>
+        <label for="add_role" class="block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Role Akun</label>
+        <select
+          id="add_role"
+          name="role"
+          class="mt-1.5 block w-full rounded-md border border-[var(--line)] bg-white px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--teal)] focus:outline-none"
+        >
+          <option value="anggota" selected>Anggota</option>
+          <option value="petugas">Petugas</option>
+          <option value="pengelola">Pengelola</option>
+        </select>
+      </div>
+
+      <div class="flex items-end">
+        <button
+          type="submit"
+          class="inline-flex h-[38px] w-full items-center justify-center rounded-md bg-[var(--teal)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--teal-dark)]"
+        >
+          + Tambah User
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Filter & Tabel Daftar Pengguna -->
+  <section aria-labelledby="daftar-user-heading" class="rounded-xl border border-[var(--line)] bg-[var(--surface)]">
+    <div class="flex flex-col justify-between gap-4 border-b border-[var(--line)] p-6 sm:flex-row sm:items-center">
+      <div>
+        <h2 id="daftar-user-heading" class="text-lg font-bold text-[var(--ink)]">Daftar Pengguna Terdaftar</h2>
+        <p class="text-sm text-[var(--muted)]">Menampilkan {{ users|length }} data dari tabel <code class="font-mono text-xs">users</code>.</p>
+      </div>
+
+      <form action="/auth/anggota" method="get" class="flex flex-wrap items-center gap-2">
+        <input
+          type="text"
+          name="q"
+          value="{{ search_term }}"
+          placeholder="Cari nama atau email..."
+          class="rounded-md border border-[var(--line)] bg-white px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--teal)] focus:outline-none"
+        >
+        <select
+          name="role_filter"
+          class="rounded-md border border-[var(--line)] bg-white px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--teal)] focus:outline-none"
+        >
+          <option value="">Semua Role</option>
+          <option value="anggota" {% if selected_role == 'anggota' %}selected{% endif %}>Anggota</option>
+          <option value="petugas" {% if selected_role == 'petugas' %}selected{% endif %}>Petugas</option>
+          <option value="pengelola" {% if selected_role == 'pengelola' %}selected{% endif %}>Pengelola</option>
+        </select>
+        <button
+          type="submit"
+          class="rounded-md bg-[var(--teal)] px-3.5 py-2 text-sm font-semibold text-white hover:bg-[var(--teal-dark)]"
+        >
+          Filter
+        </button>
+        {% if search_term or selected_role %}
+        <a
+          href="/auth/anggota"
+          class="rounded-md border border-[var(--line)] bg-white px-3 py-2 text-sm text-[var(--muted)] hover:text-[var(--ink)]"
+        >
+          Reset
+        </a>
+        {% endif %}
+      </form>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-[var(--line)] text-left text-sm">
+        <thead class="bg-black/[0.02] text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+          <tr>
+            <th scope="col" class="px-6 py-3.5">ID</th>
+            <th scope="col" class="px-6 py-3.5">Nama</th>
+            <th scope="col" class="px-6 py-3.5">Email</th>
+            <th scope="col" class="px-6 py-3.5">Role Saat Ini</th>
+            <th scope="col" class="px-6 py-3.5">Terdaftar Pada</th>
+            <th scope="col" class="px-6 py-3.5">Ubah Role</th>
+            <th scope="col" class="px-6 py-3.5 text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[var(--line)]">
+          {% if users %}
+            {% for user in users %}
+            <tr class="hover:bg-black/[0.015]">
+              <td class="whitespace-nowrap px-6 py-4 font-mono text-xs text-[var(--muted)]">#{{ user.id }}</td>
+              <td class="whitespace-nowrap px-6 py-4 font-semibold text-[var(--ink)]">
+                {{ user.name }}
+                {% if user.id|string == current_user.id %}
+                <span class="ml-1.5 rounded bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-[var(--muted)]">Anda</span>
+                {% endif %}
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-[var(--muted)]">{{ user.email }}</td>
+              <td class="whitespace-nowrap px-6 py-4">
+                {% if user.role == 'pengelola' %}
+                <span class="inline-flex rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">pengelola</span>
+                {% elif user.role == 'petugas' %}
+                <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">petugas</span>
+                {% else %}
+                <span class="inline-flex rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-semibold text-[var(--teal)]">anggota</span>
+                {% endif %}
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-xs text-[var(--muted)]">{{ user.created_at }}</td>
+              <td class="whitespace-nowrap px-6 py-4">
+                <form action="/auth/anggota/role/{{ user.id }}" method="post" class="flex items-center gap-2">
+                  <select
+                    name="role"
+                    aria-label="Pilih role baru untuk {{ user.name }}"
+                    class="rounded-md border border-[var(--line)] bg-white px-2.5 py-1.5 text-xs font-medium text-[var(--ink)] focus:border-[var(--teal)] focus:outline-none"
+                  >
+                    {% for r in valid_roles %}
+                    <option value="{{ r }}" {% if user.role == r %}selected{% endif %}>{{ r }}</option>
+                    {% endfor %}
+                  </select>
+                  <button
+                    type="submit"
+                    class="rounded-md border border-[var(--teal)] px-2.5 py-1.5 text-xs font-semibold text-[var(--teal)] transition hover:bg-[var(--teal)] hover:text-white"
+                  >
+                    Simpan
+                  </button>
+                </form>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-right">
+                {% if user.id|string == current_user.id %}
+                <span class="text-xs italic text-[var(--muted)]">Akun aktif</span>
+                {% else %}
+                <form
+                  action="/auth/anggota/hapus/{{ user.id }}"
+                  method="post"
+                  onsubmit="return confirm('Yakin ingin menghapus akun {{ user.name }} ({{ user.email }})? Seluruh data peminjaman terkait juga akan terhapus.');"
+                  class="inline"
+                >
+                  <button
+                    type="submit"
+                    class="rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-600 hover:text-white"
+                  >
+                    Hapus
+                  </button>
+                </form>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="7" class="px-6 py-10 text-center text-sm text-[var(--muted)]">
+                Tidak ada data pengguna yang sesuai dengan kriteria pencarian.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}
