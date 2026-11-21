@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<section aria-labelledby="recommendation-title">
+  <div class="max-w-3xl">
+    <p class="text-sm font-semibold text-[var(--teal)]">FR-04 / Recommender Engine</p>
+    <h1 id="recommendation-title" class="mt-3 text-4xl font-bold sm:text-5xl">Uji rekomendasi buku</h1>
+    <p class="mt-4 text-base leading-7 text-[var(--muted)]">Pilih user untuk rekomendasi personal dari riwayat pinjam, atau pilih buku untuk mencari judul dengan isi paling mirip.</p>
+  </div>
+
+  <div class="mt-8 grid gap-5 lg:grid-cols-2">
+    <form id="user-form" class="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5" onsubmit="return loadRecommendations(event, 'user')">
+      <label for="user-id" class="text-sm font-semibold">Simulasi user</label>
+      <select id="user-id" name="user_id" class="mt-3 min-h-11 w-full rounded-md border border-[var(--line)] bg-white px-3" required>
+        {% for user in users %}<option value="{{ user.id }}">{{ user.name }} ({{ user.role }})</option>{% endfor %}
+      </select>
+      <button class="mt-4 min-h-11 rounded-md bg-[var(--teal)] px-4 font-semibold text-white hover:bg-[var(--teal-dark)]" type="submit">Tampilkan rekomendasi user</button>
+    </form>
+    <form id="book-form" class="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5" onsubmit="return loadRecommendations(event, 'similar')">
+      <label for="book-id" class="text-sm font-semibold">Simulasi buku</label>
+      <select id="book-id" name="book_id" class="mt-3 min-h-11 w-full rounded-md border border-[var(--line)] bg-white px-3" required>
+        {% for book in books %}<option value="{{ book.id }}">{{ book.title }} · {{ book.author }}</option>{% endfor %}
+      </select>
+      <button class="mt-4 min-h-11 rounded-md border border-[var(--teal)] px-4 font-semibold text-[var(--teal-dark)] hover:bg-[#e7f3ef]" type="submit">Cari buku serupa</button>
+    </form>
+  </div>
+
+  <section id="result" aria-live="polite" class="mt-8" aria-labelledby="result-title">
+    <div class="rounded-lg border border-dashed border-[var(--line)] bg-transparent p-8 text-center">
+      <h2 id="result-title" class="text-2xl font-semibold">Belum ada simulasi</h2>
+      <p class="mt-2 text-[var(--muted)]">Hasil dan alasan rekomendasi akan muncul di sini.</p>
+    </div>
+  </section>
+</section>
+<script>
+async function loadRecommendations(event, mode) {
+  event.preventDefault();
+  const result = document.getElementById('result');
+  const id = event.currentTarget.elements[mode === 'user' ? 'user_id' : 'book_id'].value;
+  result.innerHTML = '<div class="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-8"><p class="font-semibold">Menghitung rekomendasi...</p><p class="mt-2 text-[var(--muted)]">Engine sedang memuat fitur buku dan menghitung cosine similarity.</p></div>';
+  try {
+    const response = await fetch(`/api/recommendations/${mode}/${id}`);
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.detail || 'Permintaan gagal');
+    renderResults(payload);
+  } catch (error) {
+    result.innerHTML = `<div class="rounded-lg border border-red-300 bg-red-50 p-8"><h2 class="text-2xl font-semibold text-red-900">Rekomendasi gagal dimuat</h2><p class="mt-2 text-red-800">${escapeHtml(error.message)}</p></div>`;
+  }
+  return false;
+}
+function renderResults(payload) {
+  const result = document.getElementById('result');
+  const heading = payload.mode === 'content-based' ? `Buku serupa untuk “${payload.source_book.title}”` : `Rekomendasi untuk ${payload.user.name}`;
+  const modeText = payload.mode === 'popular-fallback' ? 'Fallback top popular books' : payload.mode === 'history-based' ? `Berbasis ${payload.history_count} histori peminjaman` : 'Content-based filtering';
+  const cards = payload.recommendations.map((item) => `<article class="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5"><div class="flex items-start justify-between gap-4"><div><h3 class="text-xl font-semibold">${escapeHtml(item.title)}</h3><p class="mt-1 text-sm text-[var(--muted)]">${escapeHtml(item.author)} · ${escapeHtml(item.category)}</p></div><strong class="whitespace-nowrap text-[var(--teal-dark)]">${item.score_percent}%</strong></div><div class="score-bar mt-4" aria-label="Skor kemiripan ${item.score_percent} persen"><span style="width:${Math.min(item.score_percent, 100)}%"></span></div><p class="mt-4 text-sm leading-6 text-[var(--muted)]">${escapeHtml(item.reason)}</p></article>`).join('');
+  result.innerHTML = `<div class="flex flex-wrap items-end justify-between gap-3"><div><h2 id="result-title" class="text-3xl font-semibold">${heading}</h2><p class="mt-2 text-[var(--muted)]">${modeText}. Skor berasal dari cosine similarity TF-IDF.</p></div><span class="rounded-md bg-[#e7f3ef] px-3 py-2 text-sm font-semibold text-[var(--teal-dark)]">${payload.recommendations.length} hasil</span></div><div class="mt-5 grid gap-4 md:grid-cols-2">${cards}</div>`;
+}
+function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;', '"':'&quot;'}[char])); }
+</script>
+{% endblock %}

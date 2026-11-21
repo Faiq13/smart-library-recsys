@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title|default('Smart Library RecSys') }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body class="min-h-screen">
+  <div class="min-h-screen lg:flex">
+    <aside class="w-full border-b border-[var(--line)] bg-[var(--surface)] lg:min-h-screen lg:w-72 lg:border-b-0 lg:border-r">
+      <div class="p-6">
+        <p class="text-xs font-bold uppercase tracking-[0.18em] text-[var(--teal)]">Perpustakaan kampus</p>
+        <a href="/" class="mt-2 block text-2xl font-bold text-[var(--ink)]">Smart Library</a>
+        <p class="mt-2 text-sm text-[var(--muted)]">Ruang kerja untuk sirkulasi, katalog, dan rekomendasi buku.</p>
+      </div>
+      <nav aria-label="Navigasi utama" class="px-3 pb-5">
+        <p class="px-3 pb-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Modul sistem</p>
+        <div class="space-y-1">
+          <a class="module-link block rounded-md px-3 py-3 text-sm" href="/rekomendasi" {% if active_page == 'recommendations' %}aria-current="page"{% endif %}>Rekomendasi Buku</a>
+          <a class="module-link block rounded-md px-3 py-3 text-sm" href="/books/status">Katalog Buku <span class="text-xs text-[var(--muted)]">(Dhia)</span></a>
+          <a class="module-link block rounded-md px-3 py-3 text-sm" href="/circulation/status">Sirkulasi <span class="text-xs text-[var(--muted)]">(Wildan)</span></a>
+          <a class="module-link block rounded-md px-3 py-3 text-sm" href="/auth/status">Akun & Auth <span class="text-xs text-[var(--muted)]">(Rifa)</span></a>
+          <a class="module-link block rounded-md px-3 py-3 text-sm" href="/analytics/status">Analitik <span class="text-xs text-[var(--muted)]">(Azrur)</span></a>
+        </div>
+      </nav>
+    </aside>
+    <main class="min-w-0 flex-1">
+      <div class="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-12">
+        {% if not content_only and active_page == 'home' %}
+        <section aria-labelledby="home-title" class="max-w-3xl py-12">
+          <p class="text-sm font-semibold text-[var(--teal)]">Fondasi tugas besar RPL</p>
+          <h1 id="home-title" class="mt-4 text-5xl leading-tight sm:text-6xl">Koleksi lebih mudah dipahami, rekomendasi lebih relevan.</h1>
+          <p class="mt-6 max-w-2xl text-lg leading-8 text-[var(--muted)]">Gunakan modul FR-04 untuk menguji rekomendasi berbasis riwayat peminjaman dan kemiripan isi buku.</p>
+          <a href="/rekomendasi" class="mt-8 inline-flex min-h-11 items-center rounded-md bg-[var(--teal)] px-5 py-3 font-semibold text-white hover:bg-[var(--teal-dark)]">Buka simulasi rekomendasi</a>
+        </section>
+        {% else %}
+          {% block content %}{% endblock %}
+        {% endif %}
+      </div>
+    </main>
+  </div>
+</body>
+</html>
