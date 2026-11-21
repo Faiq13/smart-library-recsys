@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mx-auto max-w-lg py-4">
+  <div class="mb-6">
+    <p class="text-xs font-bold uppercase tracking-[0.18em] text-[var(--teal)]">Modul FR-01 • Registrasi</p>
+    <h1 class="mt-2 text-3xl font-bold text-[var(--ink)]">Daftar Anggota Baru</h1>
+    <p class="mt-2 text-sm text-[var(--muted)]">
+      Buat akun baru dengan hak akses default sebagai <span class="font-semibold text-[var(--ink)]">Anggota</span> untuk meminjam buku dan mendapatkan rekomendasi bacaan.
+    </p>
+  </div>
+
+  {% if error %}
+  <div role="alert" class="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+    <span class="font-semibold">Registrasi Gagal:</span> {{ error }}
+  </div>
+  {% endif %}
+
+  <div class="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
+    <form action="/auth/register" method="post" class="space-y-5">
+      <div>
+        <label for="name" class="block text-sm font-semibold text-[var(--ink)]">Nama Lengkap</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          required
+          autocomplete="name"
+          placeholder="Nama lengkap sesuai identitas kampus"
+          class="mt-1.5 block w-full rounded-md border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm text-[var(--ink)] placeholder:text-gray-400 focus:border-[var(--teal)] focus:outline-none focus:ring-2 focus:ring-[var(--teal)]/20"
+        >
+      </div>
+
+      <div>
+        <label for="email" class="block text-sm font-semibold text-[var(--ink)]">Alamat Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          required
+          autocomplete="email"
+          placeholder="nama@mahasiswa.ac.id"
+          class="mt-1.5 block w-full rounded-md border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm text-[var(--ink)] placeholder:text-gray-400 focus:border-[var(--teal)] focus:outline-none focus:ring-2 focus:ring-[var(--teal)]/20"
+        >
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-semibold text-[var(--ink)]">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          minlength="6"
+          autocomplete="new-password"
+          placeholder="Minimal 6 karakter"
+          class="mt-1.5 block w-full rounded-md border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm text-[var(--ink)] placeholder:text-gray-400 focus:border-[var(--teal)] focus:outline-none focus:ring-2 focus:ring-[var(--teal)]/20"
+        >
+      </div>
+
+      <div>
+        <label for="confirm_password" class="block text-sm font-semibold text-[var(--ink)]">Konfirmasi Password</label>
+        <input
+          type="password"
+          id="confirm_password"
+          name="confirm_password"
+          required
+          minlength="6"
+          autocomplete="new-password"
+          placeholder="Ulangi password di atas"
+          class="mt-1.5 block w-full rounded-md border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm text-[var(--ink)] placeholder:text-gray-400 focus:border-[var(--teal)] focus:outline-none focus:ring-2 focus:ring-[var(--teal)]/20"
+        >
+      </div>
+
+      <button
+        type="submit"
+        class="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-[var(--teal)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--teal-dark)]"
+      >
+        Daftarkan Akun Anggota
+      </button>
+    </form>
+
+    <div class="mt-6 border-t border-[var(--line)] pt-5 text-center text-sm text-[var(--muted)]">
+      Sudah memiliki akun?
+      <a href="/auth/login" class="font-semibold text-[var(--teal)] hover:underline">
+        Kembali ke halaman Login
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
