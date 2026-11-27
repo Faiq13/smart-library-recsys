@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section aria-labelledby="analytics-heading" class="space-y-8">
+  <!-- Header & Action Bar -->
+  <div class="flex flex-col gap-4 border-b border-[var(--line)] pb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p class="text-xs font-bold uppercase tracking-[0.16em] text-[var(--teal)]">Modul FR-05 &bull; Pelaporan Sirkulasi</p>
+      <h1 id="analytics-heading" class="mt-1 text-3xl font-bold tracking-tight text-[var(--ink)] sm:text-4xl">
+        Dashboard Analitik &amp; Laporan
+      </h1>
+      <p class="mt-2 text-sm text-[var(--muted)]">
+        Ringkasan inventaris koleksi, tren peminjaman per kategori, status sirkulasi, dan akumulasi denda keterlambatan.
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <span class="text-xs text-[var(--muted)]">Diperbarui: {{ generated_at }}</span>
+      <a
+        href="/analytics/laporan/export-csv"
+        class="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[var(--teal)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--teal)] focus:ring-offset-2"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        Download Laporan CSV
+      </a>
+    </div>
+  </div>
+
+  <!-- 4 Kartu KPI -->
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <!-- KPI 1: Total Judul Buku -->
+    <article class="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Total Judul Buku</p>
+        <span class="rounded-md bg-teal-50 p-2 text-teal-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </span>
+      </div>
+      <p class="mt-3 text-3xl font-bold text-[var(--ink)]">{{ kpi.total_book_titles }}</p>
+      <p class="mt-1 text-xs text-[var(--muted)]">Judul terdaftar di katalog</p>
+    </article>
+
+    <!-- KPI 2: Total Stok Tersedia -->
+    <article class="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Total Stok Tersedia</p>
+        <span class="rounded-md bg-emerald-50 p-2 text-emerald-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+          </svg>
+        </span>
+      </div>
+      <p class="mt-3 text-3xl font-bold text-[var(--ink)]">{{ kpi.total_available_stock }}</p>
+      <p class="mt-1 text-xs text-[var(--muted)]">Eksemplar siap dipinjam</p>
+    </article>
+
+    <!-- KPI 3: Total Transaksi Peminjaman -->
+    <article class="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Total Transaksi</p>
+        <span class="rounded-md bg-sky-50 p-2 text-sky-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+        </span>
+      </div>
+      <p class="mt-3 text-3xl font-bold text-[var(--ink)]">{{ kpi.total_transactions }}</p>
+      <p class="mt-1 text-xs text-[var(--muted)]">Riwayat peminjaman tercatat</p>
+    </article>
+
+    <!-- KPI 4: Total Denda Terkumpul -->
+    <article class="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Total Denda Terkumpul</p>
+        <span class="rounded-md bg-amber-50 p-2 text-amber-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </span>
+      </div>
+      <p class="mt-3 text-3xl font-bold text-[var(--ink)]">{{ kpi.total_fines }}</p>
+      <p class="mt-1 text-xs text-[var(--muted)]">Tarif Rp 2.000/hari (&gt;7 hari)</p>
+    </article>
+  </div>
+
+  <!-- Visualisasi Grafik (Bar Chart & Doughnut Chart) -->
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <!-- Bar Chart: Peminjaman per Kategori Buku -->
+    <article class="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-6 shadow-sm lg:col-span-2">
+      <div class="mb-4">
+        <h2 class="text-lg font-bold text-[var(--ink)]">Kategori Buku Terpopuler</h2>
+        <p class="text-xs text-[var(--muted)]">Distribusi jumlah transaksi peminjaman berdasarkan kategori buku</p>
+      </div>
+      <div class="relative h-72 w-full">
+        <canvas id="categoryBarChart"></canvas>
+      </div>
+    </article>
+
+    <!-- Doughnut Chart: Status Transaksi -->
+    <article class="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-6 shadow-sm">
+      <div class="mb-4">
+        <h2 class="text-lg font-bold text-[var(--ink)]">Proporsi Status Transaksi</h2>
+        <p class="text-xs text-[var(--muted)]">Perbandingan buku dikembalikan dan sedang dipinjam</p>
+      </div>
+      <div class="relative mx-auto flex h-72 w-full max-w-xs items-center justify-center">
+        <canvas id="statusDoughnutChart"></canvas>
+      </div>
+    </article>
+  </div>
+
+  <!-- Tabel 5 Buku Paling Sering Dipinjam -->
+  <article class="overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--surface)] shadow-sm">
+    <div class="border-b border-[var(--line)] px-6 py-5">
+      <h2 class="text-lg font-bold text-[var(--ink)]">Top 5 Buku Paling Sering Dipinjam</h2>
+      <p class="mt-1 text-xs text-[var(--muted)]">Peringkat koleksi dengan frekuensi sirkulasi tertinggi</p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-[var(--line)] text-left text-sm">
+        <thead class="bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+          <tr>
+            <th scope="col" class="px-6 py-3.5">Peringkat</th>
+            <th scope="col" class="px-6 py-3.5">Judul &amp; Penulis</th>
+            <th scope="col" class="px-6 py-3.5">Kategori</th>
+            <th scope="col" class="px-6 py-3.5 text-center">Sisa Stok</th>
+            <th scope="col" class="px-6 py-3.5 text-right">Total Dipinjam</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[var(--line)]">
+          {% if top_books %}
+            {% for book in top_books %}
+            <tr class="transition hover:bg-slate-50/60">
+              <td class="whitespace-nowrap px-6 py-4 font-bold text-[var(--teal)]">#{{ loop.index }}</td>
+              <td class="px-6 py-4">
+                <p class="font-semibold text-[var(--ink)]">{{ book.book_title }}</p>
+                <p class="text-xs text-[var(--muted)]">{{ book.book_author }}</p>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4">
+                <span class="inline-flex items-center rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-800">
+                  {{ book.book_category }}
+                </span>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-center text-[var(--muted)]">
+                {{ book.stock }} / {{ book.total_stock }}
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-right font-bold text-[var(--ink)]">
+                {{ book.borrow_count }}x
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="5" class="px-6 py-8 text-center text-sm text-[var(--muted)]">
+                Belum ada data transaksi peminjaman untuk ditampilkan.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+
+<!-- Chart.js via CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<!-- Data JSON dari Jinja2 (bebas error linter JS di VS Code) -->
+<script id="analytics-chart-data" type="application/json">
+  {{ {"category": chart_category, "status": chart_status} | tojson }}
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const rawDataElement = document.getElementById("analytics-chart-data");
+    const parsedData = rawDataElement ? JSON.parse(rawDataElement.textContent) : {};
+    const categoryData = parsedData.category || { labels: [], values: [] };
+    const statusData = parsedData.status || { labels: [], values: [] };
+
+    // 1. Inisialisasi Bar Chart Kategori Buku
+    const categoryCtx = document.getElementById("categoryBarChart");
+    if (categoryCtx) {
+      new Chart(categoryCtx, {
+        type: "bar",
+        data: {
+          labels: categoryData.labels,
+          datasets: [
+            {
+              label: "Jumlah Peminjaman",
+              data: categoryData.values,
+              backgroundColor: "#0f766e",
+              hoverBackgroundColor: "#115e59",
+              borderRadius: 6,
+              maxBarThickness: 42
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (ctx) {
+                  return " Total: " + ctx.parsed.y + " transaksi";
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 },
+              grid: { color: "rgba(148, 163, 184, 0.18)" }
+            },
+            x: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    // 2. Inisialisasi Doughnut Chart Status Transaksi
+    const statusCtx = document.getElementById("statusDoughnutChart");
+    if (statusCtx) {
+      new Chart(statusCtx, {
+        type: "doughnut",
+        data: {
+          labels: statusData.labels,
+          datasets: [
+            {
+              data: statusData.values,
+              backgroundColor: ["#0f766e", "#f59e0b"],
+              borderColor: "#ffffff",
+              borderWidth: 2,
+              hoverOffset: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "65%",
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                padding: 16,
+                usePointStyle: true,
+                pointStyle: "circle"
+              }
+            }
+          }
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}
